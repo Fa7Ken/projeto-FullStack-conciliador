@@ -1,0 +1,47 @@
+# ==========================================
+# 🅰️ ANGULAR / NODE.JS (conciliador-web)
+# ==========================================
+# Dependências gigantes do Node (não devem ir pro Git)
+**/node_modules/
+**/dist/
+**/.angular/
+
+# Logs do NPM/Yarn
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json.log
+
+# ==========================================
+# ☕ JAVA / SPRING BOOT / MAVEN (conciliador-api)
+# ==========================================
+# Pastas de compilação do Maven
+**/target/
+**/*.class
+
+# Logs do Java
+*.log
+
+# ==========================================
+# 💻 CONFIGURAÇÕES DE IDEs E EDITORES
+# ==========================================
+# VS Code
+.vscode/
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.settings/
+.classpath
+.project
+
+# ==========================================
+# 🖥️ ARQUIVOS DO SISTEMA OPERACIONAL
+# ==========================================
+.DS_Store
+Thumbs.db
