@@ -1,0 +1,54 @@
+<div style="padding: 20px; font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto;">
+  <h2>🤖 Robô Conciliador - Painel Web (Java + Angular)</h2>
+
+  <div style="background: #f4f4f4; padding: 20px; border-radius: 8px;">
+    <div>
+      <label><b>Tipo de Operação:</b></label><br>
+      <select [(ngModel)]="tipoOperacao" name="tipoOperacao" style="padding: 8px; margin-top: 5px; width: 200px;">
+        <option value="CREDITO">Crédito</option>
+        <option value="DEBITO">Débito</option>
+      </select>
+    </div>
+
+    <div style="margin-top: 15px;">
+      <label><b>Relatório de Vendas (.xlsx):</b></label><br>
+      <input type="file" (change)="onVendasSelected($event)" accept=".xlsx, .xls">
+    </div>
+
+    <div style="margin-top: 15px;">
+      <label><b>Extrato Bancário (.xlsx):</b></label><br>
+      <input type="file" (change)="onExtratoSelected($event)" accept=".xlsx, .xls">
+    </div>
+
+    <button type="button" (click)="executar()" [disabled]="carregando" 
+            style="margin-top: 20px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+      {{ carregando ? 'Processando...' : 'Processar Conciliação' }}
+    </button>
+  </div>
+
+  <div *ngIf="processado && resultados.length > 0" style="margin-top: 30px;">
+    <h3>📊 Relatório de Divergências ({{ resultados.length }} encontradas)</h3>
+    <table border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
+      <tr style="background: #e0e0e0;">
+        <th style="padding: 8px;">Data Efetiva</th>
+        <th style="padding: 8px;">Bandeira</th>
+        <th style="padding: 8px;">Valor Vendido</th>
+        <th style="padding: 8px;">Valor Extrato</th>
+        <th style="padding: 8px;">Diferença</th>
+      </tr>
+      <tr *ngFor="let r of resultados" [style.background-color]="(r?.diferenca ?? 0) !== 0 ? '#ffcccc' : 'transparent'">
+        <td style="padding: 8px;">{{ r?.dataEfetiva || '-' }}</td>
+        <td style="padding: 8px;">{{ r?.bandeira || '-' }}</td>
+        <td style="padding: 8px;">R$ {{ (r?.valorVendido ?? 0) }}</td>
+        <td style="padding: 8px;">R$ {{ (r?.valorExtrato ?? 0) }}</td>
+        <td style="padding: 8px; font-weight: bold;">R$ {{ (r?.diferenca ?? 0) }}</td>
+      </tr>
+    </table>
+  </div>
+
+  <div *ngIf="processado && resultados.length === 0" 
+       style="margin-top: 30px; padding: 15px; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 5px;">
+    <b>✅ Conciliação realizada com sucesso!</b><br>
+    Nenhuma divergência foi encontrada entre o Relatório de Vendas e o Extrato Bancário para a operação selecionada.
+  </div>
+</div>
