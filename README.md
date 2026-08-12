@@ -54,13 +54,16 @@ Este **Robô Conciliador** automatiza esse processo: lê os dois arquivos, aplic
 
 ### Executando o Backend (Java Spring Boot)
 
-```bash
 # Entre na pasta da API
 cd conciliador-api
 
 # Execute a aplicação via Maven (ou inicie pela sua IDE)
 mvn spring-boot:run
 A API estará rodando em: http://localhost:8080
+
+---
+
+### Executando o Backend (Java Spring Boot)
 
 # Em outro terminal, entre na pasta do Frontend
 cd conciliador-web
