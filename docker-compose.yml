@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-conciliador}
+      POSTGRES_USER: ${POSTGRES_USER:-conciliador}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-conciliador} -d ${POSTGRES_DB:-conciliador}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  api:
+    build:
+      context: .
+      dockerfile: src/Conciliador.Api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__Default: Host=db;Port=5432;Database=${POSTGRES_DB:-conciliador};Username=${POSTGRES_USER:-conciliador};Password=${POSTGRES_PASSWORD}
+      Jwt__Key: ${JWT_KEY:?Defina JWT_KEY no arquivo .env}
+      Seed__AdminName: ${ADMIN_NAME:-Administrador}
+      Seed__AdminEmail: ${ADMIN_EMAIL:?Defina ADMIN_EMAIL no arquivo .env}
+      Seed__AdminPassword: ${ADMIN_PASSWORD:?Defina ADMIN_PASSWORD no arquivo .env}
+    ports:
+      - "${API_PORT:-5080}:8080"
+
+  web:
+    build:
+      context: ./conciliador-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "${WEB_PORT:-8080}:80"
+
+volumes:
+  db-data:
