@@ -83,14 +83,19 @@ const MAX_RANGE_DAYS = 366;
                   (dragleave)="dragOver.set(null)"
                   (drop)="onDrop($event, side.key)"
                 >
-                  <input
-                    type="file"
-                    multiple
-                    accept=".xlsx"
-                    [attr.aria-label]="side.title"
-                    (change)="onPicked($event, side.key)"
-                  />
-                  <p class="muted" style="margin: 0.4rem 0 0; font-size: 0.85rem">{{ side.hint }}</p>
+                  <label class="btn ghost small">
+                    Escolher arquivos
+                    <input
+                      class="visually-hidden"
+                      type="file"
+                      multiple
+                      accept=".xlsx"
+                      [attr.aria-label]="side.title"
+                      (change)="onPicked($event, side.key)"
+                    />
+                  </label>
+                  <span class="muted" style="font-size: 0.85rem; margin-left: 0.5rem">ou arraste os .xlsx para cá</span>
+                  <p class="muted" style="margin: 0.5rem 0 0; font-size: 0.85rem">{{ side.hint }}</p>
                   @if (files(side.key).length > 0) {
                     <ul class="files">
                       @for (file of files(side.key); track file.name) {
