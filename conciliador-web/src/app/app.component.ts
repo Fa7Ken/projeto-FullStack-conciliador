@@ -1,55 +1,48 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ConciliacaoService, ResultadoConciliacao } from './services/conciliacao.service';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AuthService } from './core/auth.service';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './app.component.html',
-  styleUrl: './app.css'
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: `
+    header { background: var(--ink); color: #fff; }
+    .bar { max-width: 1080px; margin: 0 auto; padding: 0.7rem 1.25rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+    .brand { font-weight: 700; letter-spacing: 0.02em; color: #fff; text-decoration: none; }
+    nav { display: flex; gap: 0.25rem; flex: 1; }
+    nav a { color: #c9cfdb; text-decoration: none; padding: 0.3rem 0.7rem; border-radius: var(--radius); }
+    nav a.active { background: rgba(255, 255, 255, 0.14); color: #fff; }
+    .user { display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; color: #c9cfdb; }
+    .user button { background: transparent; border: 1px solid #6d7688; color: #fff; border-radius: var(--radius); padding: 0.25rem 0.7rem; font: inherit; cursor: pointer; }
+  `,
+  template: `
+    @if (auth.isAuthenticated()) {
+      <header>
+        <div class="bar">
+          <a class="brand" routerLink="/conciliacoes/nova">Conciliador</a>
+          <nav aria-label="Principal">
+            <a routerLink="/conciliacoes/nova" routerLinkActive="active">Nova conciliação</a>
+            <a routerLink="/conciliacoes" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Histórico</a>
+          </nav>
+          <div class="user">
+            <span>{{ auth.user()?.name }}</span>
+            <button type="button" (click)="logout()">Sair</button>
+          </div>
+        </div>
+      </header>
+    }
+    <main>
+      <router-outlet />
+    </main>
+  `,
 })
 export class AppComponent {
-  arquivoVendas: File | null = null;
-  arquivoExtrato: File | null = null;
-  tipoOperacao: string = 'CREDITO';
-  resultados: ResultadoConciliacao[] = [];
-  carregando: boolean = false;
-  processado: boolean = false; // Indica que a conciliação foi executada
+  protected readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
-  constructor(
-    private service: ConciliacaoService,
-    private cdr: ChangeDetectorRef
-  ) {}
-
-  onVendasSelected(event: any) { this.arquivoVendas = event.target.files[0]; }
-  onExtratoSelected(event: any) { this.arquivoExtrato = event.target.files[0]; }
-
-  executar() {
-    if (!this.arquivoVendas || !this.arquivoExtrato) {
-      alert('Selecione ambos os arquivos!');
-      return;
-    }
-
-    this.carregando = true;
-    this.processado = false;
-
-    this.service.processar(this.arquivoVendas, this.arquivoExtrato, this.tipoOperacao)
-      .subscribe({
-        next: (data) => {
-          console.log('Dados recebidos do Java:', data);
-          this.resultados = data || [];
-          this.carregando = false;
-          this.processado = true; // Marca como processado
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          alert('Erro no processamento: ' + (err.error?.message || err.message));
-          this.carregando = false;
-          this.processado = false;
-          this.cdr.detectChanges();
-        }
-      });
+  protected logout(): void {
+    this.auth.logout();
+    void this.router.navigate(['/login']);
   }
 }
