@@ -9,8 +9,9 @@ public sealed class ReconciliationEngine
     // Debito cai no proximo dia util; a folga cobre fim de semana e feriado
     private const int DebitLookbackDays = 4;
 
-    // Credito a vista cai cerca de 30 dias depois da venda
-    private const int CreditLookbackDays = 31;
+    // Credito a vista cai cerca de 30 dias depois da venda. Usa 28 para avisar quando falta o mes
+    // anterior inteiro, sem acusar falta por causa de um ou dois dias na virada do mes
+    private const int CreditLookbackDays = 28;
 
     private static readonly CultureInfo PtBr = CultureInfo.GetCultureInfo("pt-BR");
 
