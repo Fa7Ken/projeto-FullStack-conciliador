@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend (.NET 8)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: conciliador
+          POSTGRES_USER: conciliador
+          POSTGRES_PASSWORD: conciliador
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U conciliador"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build --logger "trx;LogFileName=results.trx"
+
+      # Aplica as migrations em um PostgreSQL real, ja que os testes de integracao usam SQLite
+      - name: Apply migrations on PostgreSQL
+        run: |
+          dotnet tool restore
+          dotnet ef database update \
+            --project src/Conciliador.Infrastructure \
+            --startup-project src/Conciliador.Infrastructure \
+            --configuration Release --no-build \
+            --connection "Host=localhost;Port=5432;Database=conciliador;Username=conciliador;Password=conciliador"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: "**/results.trx"
